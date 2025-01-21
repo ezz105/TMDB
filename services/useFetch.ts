@@ -1,47 +1,44 @@
 const BASE_URL = 'https://api.themoviedb.org/3';
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+
 
 interface FetchOptions {
-  page?: number;
-  params?: Record<string, string | number | boolean>;
-  headers?: Record<string, string>;
+  method?: string; // Optional method property
+  headers?: Record<string, string>; // Optional headers property
+  // Add any other properties you expect in options here
 }
 
-export const fetchData = async <T>(
-  endpoint: string,
-  options: FetchOptions = {}
-): Promise<T> => {
-  const { page = 1, params = {}, headers = {} } = options;
 
-  // Build query parameters dynamically
-  const urlParams = new URLSearchParams({
-    api_key: API_KEY!,
-    language: 'en-US',
-    page: page.toString(),
-    ...Object.entries(params).reduce((acc, [key, value]) => {
-      acc[key] = String(value);
-      return acc;
-    }, {} as Record<string, string>),
+
+export const fetchData = async (endpoint: string, language: string = 'en', filters: Record<string, any> = {}, options: FetchOptions = {}) => {
+  console.log('Using language for fetch:', language);
+
+  const queryParams = new URLSearchParams({
+    api_key: API_KEY || '',
+    language,
+    ...filters,
   });
 
-  const url = `${BASE_URL}/${endpoint}?${urlParams.toString()}`;
+  const url = `${BASE_URL}${endpoint}?${queryParams.toString()}`;
 
   try {
     const response = await fetch(url, {
+      method: options.method || 'GET', 
       headers: {
         'Content-Type': 'application/json',
-        ...headers,
+        ...options.headers, 
       },
+      ...options,
     });
 
     if (!response.ok) {
-      throw new Error(`Error: ${response.status} ${response.statusText}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data: T = await response.json();
+    const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Fetch error:', error);
-    throw error;
+    console.error('Error fetching data:', error);
+    throw error; 
   }
 };
