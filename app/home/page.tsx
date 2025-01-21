@@ -87,44 +87,51 @@ const HomePage = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div >
-      <Image 
-        src="/home.jpg"
-        alt="Movies Banner"
-        width={1200}
-        height={400}
-        className="w-full rounded-lg mb-8"
-        priority
-      />
-      <div >
+    <div className="relative min-h-screen">
+      {/* Banner Section */}
+      <div className="relative w-full h-[1000px] overflow-hidden">
+        <Image 
+          src="/home.jpg"
+          alt="Movies Banner"
+          width={1200}
+          height={400}
+          className="w-full h-full object-cover mt-12"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
       </div>
-    {/* <div className="container mx-auto px-4 py-8 max-w-7xl my-12"></div> */}
-      <div className="relative container mx-auto px-4 py-8 max-w-7xl my-12">
-      <h1 className="text-3xl font-bold mb-5">Popular Movies</h1>
-        <button 
-          onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 bg-blue-500/80 hover:bg-black/75 text-white p-5 rounded-r-lg z-10"
-        >
-          ←
-        </button>
-        <div 
-          ref={scrollContainerRef}
-          className="flex overflow-x-auto space-x-4 pb-4 scrollbar-hide scroll-smooth"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
-          {movies.map(movie => (
-            <div key={movie.id} className="flex-none w-[200px]">
-              <MovieCard movie={movie} />
-            </div>
-          ))}
+
+      {/* Movies Section */}
+      <div className="relative container mx-auto px-6 mt-[-400px] z-10  shadow-black/50">
+        <h1 className="text-4xl font-bold mb-8 text-white drop-shadow-lg shadow-black">Popular Movies</h1>
+        <div className="relative ">
+          <button 
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-700/90 text-white p-4 rounded-r-lg z-10 transition-all duration-300 shadow-lg"
+            aria-label="Scroll left"
+          >
+            <span className="text-xl">←</span>
+          </button>
+          <div 
+            ref={scrollContainerRef}
+            className="flex overflow-x-auto space-x-6 pb-8 scrollbar-hide scroll-smooth"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
+            {movies.map(movie => (
+              <div key={movie.id} className="flex-none w-[220px] transform transition-transform duration-300 hover:scale-105">
+                <MovieCard movie={movie} className="overflow-hidden w-full " />
+              </div>
+            ))}
+          </div>
+          <button 
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-700/90 text-white p-4 rounded-l-lg z-10 transition-all duration-300 shadow-lg"
+            aria-label="Scroll right"
+          >
+            <span className="text-xl">→</span>
+          </button>
         </div>
-        <button 
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-500/80 hover:bg-black/75 text-white p-5 rounded-l-lg z-10"
-        >
-          →
-        </button>
       </div>
     </div>
   );

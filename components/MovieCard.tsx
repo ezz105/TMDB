@@ -12,13 +12,14 @@ interface Movie {
 
 interface MovieCardProps {
   movie: Movie;
+  className?: string;
 }
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+const MovieCard: React.FC<MovieCardProps> = ({ movie, className }) => {
   return (
     <div 
       key={movie.id} 
-      className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 w-full  mx-auto"
+      className={`bg-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 w-full  mx-auto ${className}`}
     >
       <div className="relative">
         <img
