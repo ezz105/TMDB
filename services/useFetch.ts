@@ -1,18 +1,21 @@
 const BASE_URL = 'https://api.themoviedb.org/3';
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
-
-interface FetchOptions {
-  method?: string; // Optional method property
-  headers?: Record<string, string>; // Optional headers property
-  // Add any other properties you expect in options here
+interface FetchOptions extends RequestInit {
+  // توسيع RequestInit لتشمل كل خيارات fetch
+  // يمكن إضافة خيارات مخصصة هنا إذا لزم الأمر
 }
 
+export const fetchData = async (
+  endpoint: string,
+  language: string = 'en',
+  filters: Record<string, any> = {},
+  options: FetchOptions = {}
+) => {
+  // تفكيك `method` و `headers` من `options` مع قيم افتراضية
+  const { method = 'GET', headers: optionsHeaders = {}, ...restOptions } = options;
 
-
-export const fetchData = async (endpoint: string, language: string = 'en', filters: Record<string, any> = {}, options: FetchOptions = {}) => {
-  console.log('Using language for fetch:', language);
-
+  // بناء معلمات البحث (query parameters)
   const queryParams = new URLSearchParams({
     api_key: API_KEY || '',
     language,
@@ -23,22 +26,21 @@ export const fetchData = async (endpoint: string, language: string = 'en', filte
 
   try {
     const response = await fetch(url, {
-      method: options.method || 'GET', 
+      method,
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers, 
+        ...optionsHeaders, // دمج الـ headers المخصصة
       },
-      ...options,
+      ...restOptions, // نشر الخيارات الأخرى (مثل body، cache، إلخ.)
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`خطأ في HTTP! الحالة: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
-    console.error('Error fetching data:', error);
-    throw error; 
+    console.error('حدث خطأ أثناء جلب البيانات:', error);
+    throw error;
   }
 };
