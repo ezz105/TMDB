@@ -87,51 +87,44 @@ const HomePage = () => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="relative min-h-screen">
-      {/* Banner Section */}
-      <div className="relative w-full h-[1000px] overflow-hidden">
-        <Image 
-          src="/home.jpg"
-          alt="Movies Banner"
-          width={1200}
-          height={400}
-          className="w-full h-full object-cover mt-12"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
-      </div>
-
-      {/* Movies Section */}
-      <div className="relative container mx-auto px-6 mt-[-400px] z-10  shadow-black/50">
-        <h1 className="text-4xl font-bold mb-8 text-white drop-shadow-lg shadow-black">Popular Movies</h1>
-        <div className="relative ">
-          <button 
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-700/90 text-white p-4 rounded-r-lg z-10 transition-all duration-300 shadow-lg"
-            aria-label="Scroll left"
-          >
-            <span className="text-xl">←</span>
-          </button>
-          <div 
-            ref={scrollContainerRef}
-            className="flex overflow-x-auto space-x-6 pb-8 scrollbar-hide scroll-smooth"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-          >
-            {movies.map(movie => (
-              <div key={movie.id} className="flex-none w-[220px] transform transition-transform duration-300 hover:scale-105">
-                <MovieCard movie={movie} className="overflow-hidden w-full " />
-              </div>
-            ))}
-          </div>
-          <button 
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-700/90 text-white p-4 rounded-l-lg z-10 transition-all duration-300 shadow-lg"
-            aria-label="Scroll right"
-          >
-            <span className="text-xl">→</span>
-          </button>
+    <div className="relative min-h-screen bg-gradient-to-b from-[#f7ff00] to-[#ffbf00] ">
+      <Image 
+        src="/home.jpg"
+        alt="Movies Banner"
+        width={1200}
+        height={400}
+        className="absolute inset-0 w-full h-full object-cover filter backdrop-blur-md"
+        priority
+      />
+      <div className="relative inset-0 bg-gradient-to-b from-transparent to-black/70"></div>
+      <h1 className="text-4xl font-bold  text-white drop-shadow-lg shadow-black ">Popular Movies</h1>
+      <div className="relative filter backdrop-blur-md my-[9em] ">
+        <button 
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-700/90 text-white p-4 rounded-r-lg z-10 transition-all duration-300 shadow-lg"
+          aria-label="Scroll left"
+        >
+          <span className="text-xl">←</span>
+        </button>
+        <div 
+          ref={scrollContainerRef}
+          className="flex overflow-x-hidden space-x-6 pb-8 scrollbar-hide scroll-smooth"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          {movies.map(movie => (
+            <div key={movie.id} className="flex-none w-[220px] transform transition-transform duration-300 hover:scale-105 filter backdrop-blur-md">
+              <MovieCard movie={movie} className="overflow-hidden w-full rounded-lg shadow-lg" />
+            </div>
+          ))}
         </div>
+        <button 
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-1/2 -translate-y-1/2 bg-blue-600/90 hover:bg-blue-700/90 text-white p-4 rounded-l-lg z-10 transition-all duration-300 shadow-lg"
+          aria-label="Scroll right"
+        >
+          <span className="text-xl">→</span>
+        </button>
       </div>
     </div>
   );

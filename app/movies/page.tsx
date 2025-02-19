@@ -4,23 +4,11 @@ import { useEffect, useState } from 'react';
 import { fetchData } from '@/services/useFetch';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Movie, MovieResponse } from '@/types/movie-types';
 
-interface Movie {
-  id: number;
-  title: string;
-  poster_path: string | null;
-  release_date: string;
-  vote_average: number;
-}
-
-interface MovieResponse {
-  results: Movie[];
-  total_results: number;
-  page: number;
-  total_pages: number;
-}
 
 export default function MoviesPage() {
+  // Existing states
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,40 +16,65 @@ export default function MoviesPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [totalResults, setTotalResults] = useState(0);
 
+  // New filter states
+  const [filterGenre, setFilterGenre] = useState('');
+  const [filterYear, setFilterYear] = useState('');
+  const [filterRating, setFilterRating] = useState('');
+
   // Debounce search term
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Fetch movies whenever the search term or filters change
   useEffect(() => {
     const getMovies = async () => {
       setLoading(true);
       setError(null);
       
       try {
+        // Choose endpoint based on search term
         const endpoint = debouncedSearch ? '/search/movie' : '/discover/movie';
-        const params = debouncedSearch
+        
+        // Base parameters (modify as needed)
+        const params: any = debouncedSearch
           ? { 
               query: debouncedSearch,
               include_adult: false,
               page: 1,
-              region: 'US' // Add region for better results
+              region: 'US'
             }
           : { 
               sort_by: 'popularity.desc',
               include_adult: false,
               page: 1,
-              'vote_count.gte': 100 // Only movies with significant votes
+              'vote_count.gte': 100
             };
 
-        const data = await fetchData(endpoint, 'en', params) as MovieResponse;
-        
+        // Add filter parameters if they are set
+        if (filterGenre) {
+          // The value here should match the API’s expected genre id or slug
+          params.with_genres = filterGenre;
+        }
+        if (filterYear) {
+          params.primary_release_year = filterYear;
+        }
+        if (filterRating) {
+          params['vote_average.gte'] = filterRating;
+        }
+
+        // Fetch data with the combined search and filter params
+        const data = (await fetchData(endpoint, 'en', params)) as MovieResponse;
+
         if (data.results.length === 0) {
-          setError(debouncedSearch ? 'No movies found matching your search.' : 'No movies available.');
+          setError(
+            debouncedSearch 
+              ? 'No movies found matching your search.'
+              : 'No movies available with the selected filters.'
+          );
         }
         
         setMovies(data.results);
@@ -70,7 +83,7 @@ export default function MoviesPage() {
         setError(
           debouncedSearch 
             ? 'Failed to search movies. Please try again.' 
-            : 'Failed to load popular movies. Please refresh the page.'
+            : 'Failed to load movies. Please refresh the page.'
         );
         setMovies([]);
       } finally {
@@ -78,8 +91,9 @@ export default function MoviesPage() {
       }
     };
 
+    // Dependency array includes filters and debounced search term
     getMovies();
-  }, [debouncedSearch]);
+  }, [debouncedSearch, filterGenre, filterYear, filterRating]);
 
   return (
     <div className="container mx-auto px-4 py-8 mt-16">
@@ -92,7 +106,7 @@ export default function MoviesPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search movies..."
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            disabled={loading && !searchTerm} // Prevent new searches while initial load
+            disabled={loading && !searchTerm}
           />
           {loading && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -100,6 +114,41 @@ export default function MoviesPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Filter Inputs */}
+      <div className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Genre Filter */}
+        <select
+          value={filterGenre}
+          onChange={(e) => setFilterGenre(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">All Genres</option>
+          <option value="28">Action</option>
+          <option value="35">Comedy</option>
+          <option value="18">Drama</option>
+          {/* Add more genres as needed */}
+        </select>
+
+        {/* Year Filter */}
+        <input
+          type="number"
+          value={filterYear}
+          onChange={(e) => setFilterYear(e.target.value)}
+          placeholder="Year"
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+        />
+
+        {/* Rating Filter */}
+        <input
+          type="number"
+          step="0.1"
+          value={filterRating}
+          onChange={(e) => setFilterRating(e.target.value)}
+          placeholder="Min Rating"
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       {/* Results Header */}
@@ -125,7 +174,7 @@ export default function MoviesPage() {
       {!error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {movies.map((movie) => (
-            <Link href={`/movies/${movie.id}`} key={movie.id} className="group">
+            <Link key={movie.id} href={`/movies/${movie.id}`}>
               <div className="bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-200 hover:scale-105">
                 <div className="relative h-[300px]">
                   {movie.poster_path ? (
